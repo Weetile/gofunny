@@ -23,11 +23,21 @@ func main() {
 		return
 	}
 
-	// Create a new drawing context
-	dc := gg.NewContextForImage(img)
+	// Calculate the desired padding and text height
+	padding := 50    // Adjust this value for desired padding
+	textHeight := 72 // Adjust this value based on the font size
+	totalPadding := padding + textHeight
+
+	// Create a new drawing context with the increased height
+	dc := gg.NewContext(img.Bounds().Max.X, img.Bounds().Max.Y+totalPadding)
+
+	// Draw a white rectangle to fill the padding area
+	dc.SetRGB(1, 1, 1) // Set color to white
+	dc.DrawRectangle(0, 0, float64(img.Bounds().Max.X), float64(totalPadding))
+	dc.Fill()
 
 	// Set font face and size
-	if err := dc.LoadFontFace(fontPath, 72); err != nil { // Change 24 to your desired font size
+	if err := dc.LoadFontFace(fontPath, float64(textHeight)); err != nil {
 		fmt.Println("Error loading font:", err)
 		return
 	}
@@ -36,16 +46,18 @@ func main() {
 	caption := "Your caption here"
 
 	// Measure the text dimensions
-	tw, th := dc.MeasureString(caption)
+	tw, _ := dc.MeasureString(caption)
 
 	// Calculate the position to draw the caption
-	imgWidth := float64(img.Bounds().Size().X)
-	x := (imgWidth - tw) / 2 // Center horizontally
-	y := th                  // Place above the image with some padding
+	x := (float64(img.Bounds().Size().X) - tw) / 2 // Center horizontally
+	y := float64(padding) + float64(textHeight)/2  // Center vertically within the padding
 
 	// Draw the caption text in black color
 	dc.SetRGB(0, 0, 0) // Set text color to black
 	dc.DrawString(caption, x, y)
+
+	// Draw the original image onto the context
+	dc.DrawImage(img, 0, totalPadding)
 
 	// Save or display the resulting image
 	if err := dc.SavePNG("output.png"); err != nil {
