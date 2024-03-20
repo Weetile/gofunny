@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -8,25 +9,30 @@ import (
 )
 
 func main() {
-	// Load your image
-	imgPath := "input.jpg" // Change this to your image file path
-	img, err := gg.LoadImage(imgPath)
+	// Define flags
+	imageFlag := flag.String("image", "input.jpg", "Path to the input image")
+	fontFlag := flag.String("font", "font.ttf", "Path to the font file")
+	paddingFlag := flag.Int("padding", 50, "Padding above the image")
+	textHeightFlag := flag.Int("textHeight", 72, "Height of the caption text")
+
+	// Parse flags
+	flag.Parse()
+
+	// Load the image
+	img, err := gg.LoadImage(*imageFlag)
 	if err != nil {
 		fmt.Println("Error loading image:", err)
 		return
 	}
 
-	// Load your font
-	fontPath := "font.ttf" // Change this to your font file path
-	if _, err := os.Stat(fontPath); os.IsNotExist(err) {
+	// Load the font
+	if _, err := os.Stat(*fontFlag); os.IsNotExist(err) {
 		fmt.Println("Font file does not exist:", err)
 		return
 	}
 
-	// Calculate the desired padding and text height
-	padding := 50    // Adjust this value for desired padding
-	textHeight := 72 // Adjust this value based on the font size
-	totalPadding := padding + textHeight
+	// Calculate the total padding
+	totalPadding := *paddingFlag + *textHeightFlag
 
 	// Create a new drawing context with the increased height
 	dc := gg.NewContext(img.Bounds().Max.X, img.Bounds().Max.Y+totalPadding)
@@ -37,7 +43,7 @@ func main() {
 	dc.Fill()
 
 	// Set font face and size
-	if err := dc.LoadFontFace(fontPath, float64(textHeight)); err != nil {
+	if err := dc.LoadFontFace(*fontFlag, float64(*textHeightFlag)); err != nil {
 		fmt.Println("Error loading font:", err)
 		return
 	}
@@ -50,7 +56,7 @@ func main() {
 
 	// Calculate the position to draw the caption
 	x := (float64(img.Bounds().Size().X) - tw) / 2 // Center horizontally
-	y := float64(padding) + float64(textHeight)/2  // Center vertically within the padding
+	y := float64(*paddingFlag) + float64(*textHeightFlag)/2   // Center vertically within the padding
 
 	// Draw the caption text in black color
 	dc.SetRGB(0, 0, 0) // Set text color to black
@@ -66,3 +72,4 @@ func main() {
 	}
 	fmt.Println("Image with caption saved as output.png")
 }
+
