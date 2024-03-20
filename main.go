@@ -31,7 +31,7 @@ func main() {
 		return
 	}
 
-	// Calculate the desired text height proportional to 1/6 of the image height
+	// Calculate the desired text height proportional to 1/8 of the image height
 	textHeight := int(float64(img.Bounds().Dy()) / 8)
 
 	// Use the padding from the flag
@@ -58,11 +58,12 @@ func main() {
 	}
 
 	// Measure the text dimensions
-	tw, _ := dc.MeasureString(caption)
+	tw, th := dc.MeasureString(caption)
 
 	// Calculate the position to draw the caption
 	x := (float64(img.Bounds().Size().X) - tw) / 2 // Center horizontally
-	y := float64(padding) + float64(textHeight)/2  // Center vertically within the padding
+	// Adjust y coordinate to center vertically within the padding area
+	y := float64(totalPadding)/2 + float64(th)/2
 
 	// Draw the caption text in black color
 	dc.SetRGB(0, 0, 0) // Set text color to black
@@ -78,3 +79,4 @@ func main() {
 	}
 	fmt.Println("Image with caption saved as output.png")
 }
+
